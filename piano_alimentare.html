@@ -1,0 +1,278 @@
+<!DOCTYPE html>
+<html lang="it">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+<title>Piano Alimentare Elena</title>
+<style>
+  @import url('https://fonts.googleapis.com/css2?family=DM+Sans:ital,wght@0,300;0,400;0,500;0,600;0,700;1,400&family=DM+Mono:wght@400;500&display=swap');
+  :root {
+    --violet:#7c3aed;--violet-mid:#9333ea;--violet-light:#a78bfa;
+    --violet-pale:#ede9fe;--violet-faint:#f5f3ff;--violet-border:#ddd6fe;
+    --bg:#f5f3ff;--surface:#ffffff;--surface2:#f5f3ff;
+    --border:#e4e0f5;--text:#1e1040;--text-dim:#5b5080;--text-muted:#9c92c0;
+    --amber:#d97706;--amber-bg:#fffbeb;--amber-bd:#fde68a;
+    --green:#059669;--green-bg:#ecfdf5;--green-bd:#a7f3d0;
+    --rose:#dc2626;--rose-bg:#fef2f2;--rose-bd:#fecaca;
+    --blue:#2563eb;--blue-bg:#eff6ff;--blue-bd:#bfdbfe;
+    --teal:#0d9488;--teal-bg:#f0fdfa;--teal-bd:#99f6e4;
+    --pink:#9333ea;--pink-bg:#fdf4ff;--pink-bd:#e9d5ff;
+  }
+  *{margin:0;padding:0;box-sizing:border-box;-webkit-tap-highlight-color:transparent}
+  body{font-family:'DM Sans',sans-serif;background:var(--bg);color:var(--text);min-height:100vh;max-width:430px;margin:0 auto;padding-bottom:40px}
+
+  .header{background:linear-gradient(135deg,var(--violet) 0%,var(--violet-mid) 100%);padding:22px 20px 18px;position:sticky;top:0;z-index:100;box-shadow:0 2px 14px rgba(124,58,237,.28)}
+  .header h1{font-size:19px;font-weight:700;color:#fff;letter-spacing:-.3px}
+  .header p{font-size:11px;color:rgba(255,255,255,.7);margin-top:3px}
+
+  .day-wrap{background:#fff;border-bottom:2px solid var(--violet-border);position:sticky;top:66px;z-index:90}
+  .day-selector{display:flex;gap:8px;padding:13px 14px;overflow-x:auto;scrollbar-width:none}
+  .day-selector::-webkit-scrollbar{display:none}
+  .day-btn{flex-shrink:0;display:flex;flex-direction:column;align-items:center;gap:2px;padding:8px 12px;border-radius:12px;border:1.5px solid var(--border);background:var(--surface2);cursor:pointer;transition:all .18s;min-width:50px}
+  .day-btn .dn{font-size:16px;font-weight:700;color:var(--text-muted)}
+  .day-btn .dl{font-size:9px;font-weight:600;color:var(--text-muted);text-transform:uppercase;letter-spacing:.5px}
+  .day-btn.active{background:var(--violet);border-color:var(--violet);box-shadow:0 3px 10px rgba(124,58,237,.35)}
+  .day-btn.active .dn,.day-btn.active .dl{color:#fff}
+
+  .content{padding:14px 14px 0}
+
+  /* CARD */
+  .meal-card{background:#fff;border-radius:14px;border:1.5px solid var(--border);margin-bottom:10px;overflow:hidden;box-shadow:0 1px 4px rgba(124,58,237,.07)}
+
+  .meal-header{display:flex;align-items:center;gap:11px;padding:14px 16px;cursor:pointer;user-select:none;transition:background .15s;-webkit-tap-highlight-color:transparent}
+  .meal-header:active{background:var(--violet-faint)}
+
+  .meal-icon{width:36px;height:36px;border-radius:10px;display:flex;align-items:center;justify-content:center;font-size:18px;flex-shrink:0}
+  .meal-info{flex:1;min-width:0}
+  .meal-title{font-size:13px;font-weight:700;color:var(--text);text-transform:uppercase;letter-spacing:.5px;line-height:1.2}
+  .meal-sub{font-size:11px;color:var(--text-muted);margin-top:2px;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+
+  .meal-right{display:flex;align-items:center;gap:7px;flex-shrink:0}
+  .badge{font-size:9px;font-weight:700;padding:3px 8px;border-radius:20px;text-transform:uppercase;letter-spacing:.5px}
+  .b-fixed{background:var(--amber-bg);color:var(--amber);border:1px solid var(--amber-bd)}
+  .b-free{background:var(--violet-pale);color:var(--violet);border:1px solid var(--violet-border)}
+
+  .chev{width:20px;height:20px;display:flex;align-items:center;justify-content:center;color:var(--text-muted);transition:transform .25s ease;flex-shrink:0}
+  .meal-card.open .chev{transform:rotate(180deg)}
+
+  .meal-body{max-height:0;overflow:hidden;transition:max-height .32s ease}
+  .meal-card.open .meal-body{max-height:1200px}
+  .meal-body-inner{padding:0 16px 16px;border-top:1.5px solid var(--border)}
+
+  /* FIXED */
+  .fixed-item{display:flex;justify-content:space-between;align-items:center;padding:9px 0;border-bottom:1px solid var(--border)}
+  .fixed-item:last-child{border-bottom:none}
+  .fi-name{font-size:13px;color:var(--text);font-weight:500}
+  .fi-qty{font-family:'DM Mono',monospace;font-size:12px;color:var(--violet);background:var(--violet-pale);padding:3px 9px;border-radius:6px;font-weight:500}
+
+  /* MACRO */
+  .macro-row{margin-top:13px}
+  .macro-lbl{display:flex;align-items:center;gap:7px;margin-bottom:6px}
+  .mdot{width:7px;height:7px;border-radius:50%;flex-shrink:0}
+  .mname{font-size:11px;font-weight:700;text-transform:uppercase;letter-spacing:.7px;color:var(--text-dim)}
+  .mqty{font-family:'DM Mono',monospace;font-size:10px;padding:2px 8px;border-radius:5px;font-weight:600}
+
+  .c-carbo{background:#2563eb} .t-carbo{background:var(--blue-bg);color:var(--blue);border:1px solid var(--blue-bd)}
+  .c-proteine{background:#dc2626} .t-proteine{background:var(--rose-bg);color:var(--rose);border:1px solid var(--rose-bd)}
+  .c-lipidi{background:#d97706} .t-lipidi{background:var(--amber-bg);color:var(--amber);border:1px solid var(--amber-bd)}
+  .c-legumi{background:#059669} .t-legumi{background:var(--green-bg);color:var(--green);border:1px solid var(--green-bd)}
+  .c-verdure{background:#0d9488} .t-verdure{background:var(--teal-bg);color:var(--teal);border:1px solid var(--teal-bd)}
+  .c-mix{background:#9333ea} .t-mix{background:var(--pink-bg);color:var(--pink);border:1px solid var(--pink-bd)}
+
+  select{width:100%;background:#fff;border:1.5px solid var(--violet-border);color:var(--text);font-family:'DM Sans',sans-serif;font-size:13px;padding:10px 36px 10px 12px;border-radius:10px;appearance:none;-webkit-appearance:none;background-image:url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='12' height='8' viewBox='0 0 12 8'%3E%3Cpath d='M1 1l5 5 5-5' stroke='%237c3aed' stroke-width='2' fill='none' stroke-linecap='round'/%3E%3C/svg%3E");background-repeat:no-repeat;background-position:right 12px center;cursor:pointer;transition:border-color .2s}
+  select:focus{outline:none;border-color:var(--violet);box-shadow:0 0 0 3px rgba(124,58,237,.12)}
+  select option{background:#fff;color:var(--text)}
+
+  .note{margin-top:13px;padding:9px 12px;background:var(--violet-faint);border-left:3px solid var(--violet);border-radius:0 8px 8px 0;font-size:12px;color:var(--text-dim);font-style:italic}
+  .note strong{color:var(--violet);font-style:normal}
+</style>
+</head>
+<body>
+
+<div class="header">
+  <h1>🥗 Piano Alimentare</h1>
+  <p>Dott.ssa Valeria Falcone · Elena Ario</p>
+</div>
+
+<div class="day-wrap">
+  <div class="day-selector" id="daySel"></div>
+</div>
+
+<div class="content" id="content"></div>
+
+<script>
+const DAYS=[{n:1,k:'Lun'},{n:2,k:'Mar'},{n:3,k:'Mer'},{n:4,k:'Gio'},{n:5,k:'Ven'},{n:6,k:'Sab'},{n:7,k:'Dom'}];
+
+const CARBO70=['70g Pane','220g Patate','60g Pasta integrale','50g Quinoa','3 fette Pan bauletto integrale','6 Gallette di riso','50g Cous cous','60g Riso','50g Pangrattato','60g Farro','5 Grissini','6 Fette Wasa','1½ pacco Crackers integrali','7 Crostini integrali','130g Gnocchi','270g Purè','50g Mais','100g Polenta','100g Castagne','50g Pasta di semola','60g Pasta fresca','60g Orzo'];
+const CARBO100=['100g Pane','300g Patate','80g Pasta integrale','70g Quinoa','4 fette Pan bauletto integrale','80g Cous cous','80g Riso','80g Farro','6 Grissini','2 pacchi Crackers integrali','180g Gnocchi','80g Mais','70g Pasta di semola','90g Pasta fresca','90g Orzo','1 Piadina'];
+const LIPIDI10=['1 cucchiaio Olio EVO','20g Pesto alla genovese','10 Olive','20g Frutta secca','40g Avocado','10g Burro','15g Pesto di pistacchi','70g Salsa yogurt','15g Maionese','20g Semi','44g Acciughe sott\'olio'];
+const LEGUMI40=['40g Lenticchie secche','120g Lenticchie cotte','40g Pasta di legumi','120g Ceci cotti','40g Ceci secchi','50g Fagioli secchi','150g Fagioli cotti','220g Piselli surgelati/cotti','70g Piselli secchi','40g Farina di ceci','70g Hummus di ceci','150g Tofu','280g Fave fresche','80g Burger di soia','70g Seitan'];
+const LEGUMI80=['80g Lenticchie secche','240g Lenticchie cotte','70g Pasta di legumi','240g Ceci cotti','80g Ceci secchi','100g Fagioli secchi','300g Fagioli cotti','70g Farina di ceci','130g Hummus di ceci','130g Burger di soia','170g Seitan'];
+const CARNE_BIANCA=['200g Petto di pollo','160g Coscia di pollo (320g con osso)','190g Petto di tacchino','120g Coniglio','80g Hamburger di pollo'];
+const CARNE_ROSSA=['200g Carne rossa magra','110g Carne rossa grassa (hamburger, salsiccia…)','200g Roast beef','80g Maiale semigrasso','60g Pancetta / guanciale'];
+const PESCE200=['200g Pesce spada','300g Pesce magro (merluzzo, orata, sgombro, spigola…)','2 scatolette Tonno al naturale','140g Tonno','120g Salmone','380g Polpo','320g Calamaro','150g Salmone affumicato','300g Gamberetti','280g Vongole / cozze'];
+const FORMAGGI130=['130g Ricotta','60g Formaggio pasta molle (provola, scamorza…)','120g Philadelphia light / Fiocchi di latte','50g Formaggio stagionato (parmigiano, pecorino…)','80g Feta','140g Besciamella','110g Panna','4 Sottilette','1 Mozzarella','130g Fiocchi di latte','100g Prosciutto cotto','120g Bresaola','200g Fesa di tacchino','70g Speck','60g Prosciutto crudo'];
+const UOVA=['2 Uova intere (120g)'];
+const MIX110=['110g Mozzarella','55g Mozzarella + 1 uovo','55g Mozzarella + 60g Philadelphia','100g Pollo + mezza mozzarella','1 uovo + 60g Philadelphia','60g Formaggio pasta molle + 60g Ricotta'];
+const VERDURE=['200g Verdure fresche di stagione (no patate, piselli, mais)'];
+const SNACK50=['1 Spremuta arancia + 25g frutta secca','1 Barretta Kellog\'s + 1 yogurt + 1 quadratino cioccolato','50g Fiorentini Si e No','3 fette biscottate + 3 cucchiaini marmellata','1 pacco crackers + 1 stick parmigiano','4 Biscotti','110g Castagne','30g Chips mela + 20g frutta secca + 1 quadratino cioccolato','50g Pane + 50g Prosciutto','50g Pane + 60g Formaggio','1 Frutto + panna o frutta secca','1 Yogurt alla frutta + 5g cioccolato + 2 biscotti','40g Patatine','40g Popcorn','30g Taralli + 7 olive','20g Cioccolato / Kinder Maxi + 20g frutta secca','1 Merendina + 1 yogurt','1 Gelato confezionato'];
+const SNACK30=['1 Spremuta arancia (250ml)','1 Barretta ai cereali Kellog\'s','30g Fiorentini Si e No','2 fette biscottate + 2 cucchiaini marmellata','3 Biscotti','70g Castagne','30g Chips mela + 10g frutta secca/cioccolato','30g Pane + 30g Prosciutto','30g Pane + 30g Formaggio','1 Frutto + 10g frutta secca/cioccolato','1 Yogurt intero alla frutta','1 Mix Müller','25g Frutta secca','25g Patatine','25g Popcorn','25g Taralli','20g Cioccolato / Kinder Maxi','1 Merendina'];
+
+const plan={
+  1:{
+    colazione:[{name:'Latte parz. scremato',qty:'200g'},{name:'Cornetto',qty:'100g'}],
+    spuntinoMattina:[{name:'Frutta secca e oleosa',qty:'20g'},{name:'Frutta fresca',qty:'150g'}],
+    pranzo:{macros:[{id:'verdure',label:'Verdure',qty:'200g',color:'verdure',opts:VERDURE},{id:'lipidi',label:'Lipidi',qty:'10g',color:'lipidi',opts:LIPIDI10},{id:'carbo',label:'Carboidrati',qty:'70g',color:'carbo',opts:CARBO70},{id:'legumi',label:'Legumi',qty:'40g',color:'legumi',opts:LEGUMI40}],note:'Es: Lenticchie in umido + pane'},
+    merenda:{size:50,opts:SNACK50},
+    cena:{macros:[{id:'verdure',label:'Verdure',qty:'200g',color:'verdure',opts:VERDURE},{id:'lipidi',label:'Lipidi',qty:'10g',color:'lipidi',opts:LIPIDI10},{id:'carbo',label:'Carboidrati',qty:'70g',color:'carbo',opts:CARBO70},{id:'formaggio',label:'Formaggio / Affettato',qty:'130g',color:'proteine',opts:FORMAGGI130}],note:'Es: Caprese + 70g di pane'},
+    spuntinoSerale:{size:30,opts:SNACK30}
+  },
+  2:{
+    colazione:[{name:'Latte parz. scremato',qty:'200g'},{name:'Biscotti frollini',qty:'40g'}],
+    spuntinoMattina:[{name:'Frutta fresca',qty:'150g'},{name:'Parmigiano',qty:'15g'}],
+    pranzo:{macros:[{id:'verdure',label:'Verdure',qty:'200g',color:'verdure',opts:VERDURE},{id:'lipidi',label:'Lipidi',qty:'10g',color:'lipidi',opts:LIPIDI10},{id:'carbo',label:'Carboidrati',qty:'70g',color:'carbo',opts:CARBO70}],note:'Es: Pasta al pesto e pomodorini'},
+    merenda:{size:50,opts:SNACK50},
+    cena:{macros:[{id:'verdure',label:'Verdure',qty:'200g',color:'verdure',opts:VERDURE},{id:'lipidi',label:'Lipidi',qty:'10g',color:'lipidi',opts:LIPIDI10},{id:'carbo',label:'Carboidrati',qty:'70g',color:'carbo',opts:CARBO70},{id:'cb',label:'Carne Bianca',qty:'200g',color:'proteine',opts:CARNE_BIANCA}],note:'Es: Pollo al forno + verdure + 210g patate'},
+    spuntinoSerale:{size:30,opts:SNACK30}
+  },
+  3:{
+    colazione:[{name:'Latte parz. scremato',qty:'200g'},{name:'Merendine',qty:'30g'}],
+    spuntinoMattina:[{name:'Frutta fresca',qty:'150g'},{name:'Ricotta di pecora',qty:'100g'},{name:'Cioccolato fondente',qty:'10g'}],
+    pranzo:{macros:[{id:'verdure',label:'Verdure',qty:'200g',color:'verdure',opts:VERDURE},{id:'lipidi',label:'Lipidi',qty:'10g',color:'lipidi',opts:LIPIDI10},{id:'carbo',label:'Carboidrati',qty:'70g',color:'carbo',opts:CARBO70},{id:'uova',label:'Uova',qty:'2 uova',color:'proteine',opts:UOVA}],note:'Es: Frittata di verdure + 70g pane'},
+    merenda:{size:50,opts:SNACK50},
+    cena:{macros:[{id:'verdure',label:'Verdure',qty:'200g',color:'verdure',opts:VERDURE},{id:'lipidi',label:'Lipidi',qty:'10g',color:'lipidi',opts:LIPIDI10},{id:'carbo',label:'Carboidrati',qty:'70g',color:'carbo',opts:CARBO70},{id:'pesce',label:'Pesce',qty:'200g',color:'proteine',opts:PESCE200}],note:'Es: Salmone alla griglia + verdure + 70g pane'},
+    spuntinoSerale:{size:30,opts:SNACK30}
+  },
+  4:{
+    colazione:[{name:'Latte parz. scremato',qty:'200g'},{name:'Marmellata',qty:'10g'},{name:'Fette biscottate',qty:'30g'}],
+    spuntinoMattina:[{name:'Frutta fresca',qty:'150g'},{name:'Parmigiano',qty:'15g'}],
+    pranzo:{macros:[{id:'verdure',label:'Verdure',qty:'200g',color:'verdure',opts:VERDURE},{id:'lipidi',label:'Lipidi',qty:'10g',color:'lipidi',opts:LIPIDI10},{id:'carbo',label:'Carboidrati',qty:'70g',color:'carbo',opts:CARBO70},{id:'cb',label:'Carne Bianca',qty:'200g',color:'proteine',opts:CARNE_BIANCA}],note:'Es: Hamburger di pollo + purè di zucca e patate'},
+    merenda:{size:50,opts:SNACK50},
+    cena:{macros:[{id:'verdure',label:'Verdure',qty:'200g',color:'verdure',opts:VERDURE},{id:'lipidi',label:'Lipidi',qty:'10g',color:'lipidi',opts:LIPIDI10},{id:'legumi',label:'Legumi',qty:'80g',color:'legumi',opts:LEGUMI80}],note:'Es: Zuppa di legumi'},
+    spuntinoSerale:{size:30,opts:SNACK30}
+  },
+  5:{
+    colazione:[{name:'Marmellata',qty:'5g'},{name:'Yogurt Greco Total 5% Fage',qty:'150g'},{name:'Frutta secca e oleosa',qty:'20g'}],
+    spuntinoMattina:[{name:'Frutta secca e oleosa',qty:'20g'},{name:'Frutta fresca',qty:'150g'}],
+    pranzo:{macros:[{id:'verdure',label:'Verdure',qty:'200g',color:'verdure',opts:VERDURE},{id:'lipidi',label:'Lipidi',qty:'10g',color:'lipidi',opts:LIPIDI10},{id:'carbo',label:'Carboidrati',qty:'70g',color:'carbo',opts:CARBO70},{id:'cr',label:'Carne Rossa',qty:'200g',color:'proteine',opts:CARNE_ROSSA}],note:'Es: Arrosto di bovino + 70g pane'},
+    merenda:{size:50,opts:SNACK50},
+    cena:{macros:[{id:'verdure',label:'Verdure',qty:'200g',color:'verdure',opts:VERDURE},{id:'carbo',label:'Carboidrati',qty:'70g',color:'carbo',opts:CARBO70},{id:'lipidi',label:'Lipidi',qty:'10g',color:'lipidi',opts:LIPIDI10},{id:'pesce',label:'Pesce',qty:'200g',color:'proteine',opts:PESCE200}],note:'Es: Calamari alla griglia + verdure + 70g pane'},
+    spuntinoSerale:{size:30,opts:SNACK30}
+  },
+  6:{
+    colazione:[{name:'Merendine',qty:'30g'},{name:'Latte parz. scremato',qty:'200g'}],
+    spuntinoMattina:[{name:'Frutta fresca',qty:'150g'},{name:'Ricotta di pecora',qty:'100g'},{name:'Cioccolato fondente',qty:'10g'}],
+    pranzo:{macros:[{id:'verdure',label:'Verdure',qty:'200g',color:'verdure',opts:VERDURE},{id:'lipidi',label:'Lipidi',qty:'10g',color:'lipidi',opts:LIPIDI10},{id:'carbo',label:'Carboidrati',qty:'70g',color:'carbo',opts:CARBO70},{id:'formaggio',label:'Formaggio / Affettato',qty:'130g',color:'proteine',opts:FORMAGGI130}],note:'Es: Insalatona invernale'},
+    merenda:{size:50,opts:SNACK50},
+    cena:{macros:[{id:'verdure',label:'Verdure',qty:'200g',color:'verdure',opts:VERDURE},{id:'lipidi',label:'Lipidi',qty:'10g',color:'lipidi',opts:LIPIDI10},{id:'carbo',label:'Carboidrati',qty:'70g',color:'carbo',opts:CARBO70},{id:'uova',label:'Uova',qty:'2 uova',color:'proteine',opts:UOVA}],note:'Es: Uova al tegamino al pomodoro + 70g pane'},
+    spuntinoSerale:{size:30,opts:SNACK30}
+  },
+  7:{
+    colazione:[{name:'Latte parz. scremato',qty:'200g'},{name:'Biscotti frollini',qty:'40g'}],
+    spuntinoMattina:[{name:'Frutta secca e oleosa',qty:'20g'},{name:'Frutta fresca',qty:'150g'}],
+    pranzo:{macros:[{id:'verdure',label:'Verdure',qty:'200g',color:'verdure',opts:VERDURE},{id:'lipidi',label:'Lipidi',qty:'10g',color:'lipidi',opts:LIPIDI10},{id:'carbo',label:'Carboidrati',qty:'70g',color:'carbo',opts:CARBO70},{id:'pesce',label:'Pesce',qty:'200g',color:'proteine',opts:PESCE200}],note:'Es: Seppie in umido + 70g pane + contorno'},
+    merenda:{size:50,opts:SNACK50},
+    cena:{macros:[{id:'verdure',label:'Verdure',qty:'200g',color:'verdure',opts:VERDURE},{id:'lipidi',label:'Lipidi',qty:'10g',color:'lipidi',opts:LIPIDI10},{id:'carbo',label:'Carboidrati',qty:'100g',color:'carbo',opts:CARBO100},{id:'mix',label:'Mix Macro',qty:'110g',color:'mix',opts:MIX110}],note:'Es: Piadina speck, pesto di pistacchi e fontina'},
+    spuntinoSerale:{size:30,opts:SNACK30}
+  }
+};
+
+const mealCfg={
+  colazione:      {icon:'☀️',bg:'#fffbeb',title:'Colazione',fixed:true},
+  spuntinoMattina:{icon:'🍎',bg:'#ecfdf5',title:'Spuntino Mattina',fixed:true},
+  pranzo:         {icon:'🍽️',bg:'#f5f3ff',title:'Pranzo',fixed:false},
+  merenda:        {icon:'🍫',bg:'#fef2f2',title:'Merenda',fixed:false},
+  cena:           {icon:'🌙',bg:'#eff6ff',title:'Cena',fixed:false},
+  spuntinoSerale: {icon:'⭐',bg:'#fdf4ff',title:'Spuntino Serale',fixed:false}
+};
+
+const CHV=`<svg width="14" height="14" viewBox="0 0 14 14" fill="none"><path d="M3 5l4 4 4-4" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/></svg>`;
+
+function toggle(id){document.getElementById(id).classList.toggle('open')}
+
+function opts(arr){return arr.map(o=>`<option>${o}</option>`).join('')}
+
+function fixedCard(items,key,n){
+  const c=mealCfg[key],id=`c_${n}_${key}`;
+  const sub=items.map(i=>i.name).join(' · ');
+  return`<div class="meal-card" id="${id}">
+  <div class="meal-header" onclick="toggle('${id}')">
+    <div class="meal-icon" style="background:${c.bg}">${c.icon}</div>
+    <div class="meal-info"><div class="meal-title">${c.title}</div><div class="meal-sub">${sub}</div></div>
+    <div class="meal-right"><span class="badge b-fixed">Fisso</span><span class="chev">${CHV}</span></div>
+  </div>
+  <div class="meal-body"><div class="meal-body-inner">
+    ${items.map(it=>`<div class="fixed-item"><span class="fi-name">${it.name}</span><span class="fi-qty">${it.qty}</span></div>`).join('')}
+  </div></div>
+</div>`;
+}
+
+function varCard(meal,key,n){
+  const c=mealCfg[key],id=`c_${n}_${key}`;
+  const sub=meal.macros.map(m=>m.label).join(' · ');
+  const rows=meal.macros.map(m=>`
+    <div class="macro-row">
+      <div class="macro-lbl">
+        <span class="mdot c-${m.color}"></span>
+        <span class="mname">${m.label}</span>
+        <span class="mqty t-${m.color}">${m.qty}</span>
+      </div>
+      <select><option disabled selected value="">— scegli —</option>${opts(m.opts)}</select>
+    </div>`).join('');
+  return`<div class="meal-card" id="${id}">
+  <div class="meal-header" onclick="toggle('${id}')">
+    <div class="meal-icon" style="background:${c.bg}">${c.icon}</div>
+    <div class="meal-info"><div class="meal-title">${c.title}</div><div class="meal-sub">${sub}</div></div>
+    <div class="meal-right"><span class="badge b-free">Scegli</span><span class="chev">${CHV}</span></div>
+  </div>
+  <div class="meal-body"><div class="meal-body-inner">
+    ${rows}
+    ${meal.note?`<div class="note"><strong>💡</strong> ${meal.note}</div>`:''}
+  </div></div>
+</div>`;
+}
+
+function snackCard(snack,key,n){
+  const c=mealCfg[key],id=`c_${n}_${key}`;
+  return`<div class="meal-card" id="${id}">
+  <div class="meal-header" onclick="toggle('${id}')">
+    <div class="meal-icon" style="background:${c.bg}">${c.icon}</div>
+    <div class="meal-info"><div class="meal-title">${c.title}</div><div class="meal-sub">Alternative snack · ${snack.size}g</div></div>
+    <div class="meal-right"><span class="badge b-free">${snack.size}g</span><span class="chev">${CHV}</span></div>
+  </div>
+  <div class="meal-body"><div class="meal-body-inner" style="padding-top:13px">
+    <select><option disabled selected value="">— scegli —</option>${opts(snack.opts)}</select>
+  </div></div>
+</div>`;
+}
+
+function renderDay(n){
+  const d=plan[n];
+  document.getElementById('content').innerHTML=
+    fixedCard(d.colazione,'colazione',n)+
+    fixedCard(d.spuntinoMattina,'spuntinoMattina',n)+
+    varCard(d.pranzo,'pranzo',n)+
+    snackCard(d.merenda,'merenda',n)+
+    varCard(d.cena,'cena',n)+
+    snackCard(d.spuntinoSerale,'spuntinoSerale',n);
+}
+
+function buildSel(active){
+  document.getElementById('daySel').innerHTML=DAYS.map(d=>`
+    <div class="day-btn ${d.n===active?'active':''}" onclick="setDay(${d.n})">
+      <span class="dn">${d.n}</span><span class="dl">${d.k}</span>
+    </div>`).join('');
+}
+
+const jsToP={0:7,1:1,2:2,3:3,4:4,5:5,6:6};
+let cur=jsToP[new Date().getDay()]||1;
+
+function setDay(n){
+  cur=n;buildSel(n);renderDay(n);window.scrollTo({top:0,behavior:'smooth'});
+}
+
+buildSel(cur);
+renderDay(cur);
+</script>
+</body>
+</html>
